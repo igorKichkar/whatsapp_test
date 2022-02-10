@@ -3,12 +3,11 @@ import time
 import requests
 
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.contrib import messages
 
 from .models import Chat
 from .forms import MessageForm
-
-
 
 
 def send_qr_code(request):
@@ -23,35 +22,42 @@ def send_qr_code(request):
     chat_json = chat.json()
     if chat.status_code == 200 and 'token' in chat_json.keys() and 'id' in chat_json.keys():
         init = requests.get(f'https://dev.wapp.im/v3/instance{chat_json["id"]}/status?token={chat_json["token"]}&full=1',
-                             headers=tocken)
-        while True:
+                            headers=tocken)
+        for i in range(30):
             qr_code = requests.get(f'https://dev.wapp.im/v3/instance{chat_json["id"]}/qr_code?token={chat_json["token"]}',
-                                    headers=tocken)
+                                   headers=tocken)
             if qr_code.text:
                 break
             else:
                 time.sleep(1)
         Chat.objects.create(instance_id=int(chat_json["id"]), tocken=chat_json["token"])
-        return HttpResponse(qr_code.text)
+        messages.success(request, 'Ok.')
+        qr_code_text = qr_code.text
     else:
-        return HttpResponse('error')
+        messages.error(request, 'Error.')
+        qr_code_text = ''
+    return render(
+            request,
+            "sender/qr_code.html",
+            {"qr_code": qr_code_text},
+        )
 
 
 def send_message(request):
     form = MessageForm(request.POST or None)
-    tocken = {'X-Tasktest-Token': 'f62cdf1e83bc324ba23aee3b113c6249'}
-    chat = Chat.objects.last()
     if request.method == "POST":
+        tocken = {'X-Tasktest-Token': 'f62cdf1e83bc324ba23aee3b113c6249'}
+        chat = Chat.objects.last()
         data = {
-        "phone": "89872745052",
-        "body": form.data['new_message']
+            "phone": "89872745052",
+            "body": form.data['new_message']
         }
         message = requests.post(f'https://dev.wapp.im/v3/instance{chat.instance_id}/sendMessage?token={chat.tocken}',
-                             headers=tocken, data=data) 
+                                headers=tocken, data=data)
         if message.status_code == 200 and message.json()['sent']:
-            return HttpResponse('ok')
+            messages.success(request, 'Ok. Message sent.')
         else:
-            return HttpResponse('error')
+            messages.error(request, 'Error. Message not sent.')
     return render(
         request,
         "sender/index.html",

@@ -3,10 +3,7 @@ from django import forms
 
 class MessageForm(forms.Form):
     new_message = forms.CharField(
-        widget=forms.widgets.Textarea(
-            attrs={
-                "placeholder": "Dweet something..." 
-            }
-        ),
+        required=True,
+        widget=forms.widgets.Textarea(),
         label="",
     )
