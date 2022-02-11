@@ -10,11 +10,7 @@
     {% endif %}
     <form method="post">
         {% csrf_token %}
-        <b>Phone:</b><br>
-        <input id="phone" type="text" name="phone" maxlength="150" required><br>
-        <b>Message:</b><br>
-        <input id="new_message" type="text" name="new_message" maxlength="150" required>
-        <br>
+        {{ form.as_p }}
         <button>Send</button>
     </form>
 

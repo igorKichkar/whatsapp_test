@@ -3,12 +3,7 @@ from django import forms
 
 class MessageForm(forms.Form):
     phone = forms.CharField(
-        required=True,
-        widget=forms.widgets.Textarea(),
-        label="phone",
+        initial='89872745052',
+        required=True
     )
-    new_message = forms.CharField(
-        required=True,
-        widget=forms.widgets.Textarea(),
-        label="message",
-    )
+    new_message = forms.CharField(required=True)
