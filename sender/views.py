@@ -2,7 +2,6 @@ import time
 
 import requests
 
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib import messages
 
@@ -34,7 +33,7 @@ def send_qr_code(request):
         messages.success(request, 'Ok.')
         qr_code_text = qr_code.text
     else:
-        messages.error(request, 'Error.')
+        messages.error(request, f'Error. {chat_json["error_text"]}')
         qr_code_text = ''
     return render(
             request,
@@ -49,12 +48,14 @@ def send_message(request):
         tocken = {'X-Tasktest-Token': 'f62cdf1e83bc324ba23aee3b113c6249'}
         chat = Chat.objects.last()
         data = {
-            "phone": "89872745052",
+            "phone": form.data['phone'],
             "body": form.data['new_message']
         }
+
         message = requests.post(f'https://dev.wapp.im/v3/instance{chat.instance_id}/sendMessage?token={chat.tocken}',
                                 headers=tocken, data=data)
-        if message.status_code == 200 and message.json()['sent']:
+        print(message.json())
+        if message.status_code == 200 and 'sent' in message.json().keys():
             messages.success(request, 'Ok. Message sent.')
         else:
             messages.error(request, 'Error. Message not sent.')

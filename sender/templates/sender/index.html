@@ -2,18 +2,20 @@
 
 {% block content %}
     {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
     {% endif %}
     <form method="post">
         {% csrf_token %}
+        <b>Phone:</b><br>
+        <input id="phone" type="text" name="phone" maxlength="150" required><br>
+        <b>Message:</b><br>
         <input id="new_message" type="text" name="new_message" maxlength="150" required>
-        <button class="button is-success is-static">
-            Send
-        </button>
+        <br>
+        <button>Send</button>
     </form>
-    
+
 {% endblock content %}
